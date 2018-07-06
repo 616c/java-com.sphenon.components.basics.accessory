@@ -1,0 +1,58 @@
+package com.sphenon.basics.event;
+
+/****************************************************************************
+  Copyright 2001-2018 Sphenon GmbH
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations
+  under the License.
+*****************************************************************************/
+
+import com.sphenon.basics.context.*;
+import com.sphenon.basics.exception.*;
+import com.sphenon.basics.accessory.CoreObject;
+import com.sphenon.basics.metadata.tplinst.OSet_Object_Type_;
+
+import com.sphenon.basics.event.tplinst.*;
+
+public class DestructionEventPropagator implements EventListener_ChangeEvent_ {
+
+    protected LifeCycled destruction_target;
+
+    public DestructionEventPropagator (CallContext context, LifeCycled destruction_target) {
+        this.destruction_target = destruction_target;
+        this.add2Accessory( context, destruction_target );
+    }
+
+    protected String debugname = "";
+
+    public DestructionEventPropagator (CallContext context, LifeCycled destruction_target, String debugname) {
+        this.destruction_target = destruction_target;
+        this.debugname = debugname;
+        this.add2Accessory( context, destruction_target );
+    }
+
+    public void notify(CallContext context) {
+    }
+
+    public void notify(CallContext context, ChangeEvent event) {
+        if (event instanceof DestructionEvent) {
+            destruction_target.destroy(context);            
+        }
+    }
+
+    protected void add2Accessory( CallContext context, LifeCycled destruction_target ) {
+        if( destruction_target instanceof CoreObject ){
+            CoreObject co = (CoreObject)destruction_target;
+            try{
+                co.getAccessorys(context).add(context, this);
+            } catch( com.sphenon.basics.many.returncodes.AlreadyExists ex ) {}
+        }
+    }
+}
